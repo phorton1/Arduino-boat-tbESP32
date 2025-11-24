@@ -16,6 +16,8 @@
 
 #define PIN_SERIAL2_RX		25
 #define PIN_SERIAL2_TX		26
+#define PIN_ENABLE_UDP		13
+
 
 //------------------------
 // myIOT definition
@@ -25,6 +27,7 @@
 #define ESP32_TELNET_VERSION	"et1.0"
 #define ESP32_TELNET_URL		"https://github.com/phorton1/Arduino-boat-tbESP32"
 
+#define ID_ENABLE_UDP				"ENABLE_UDP"
 #define ID_STATUS					"STATUS"
 
 
@@ -40,6 +43,9 @@ public:
 	//	virtual bool showDebug(String path) override;
 
 	static String	_status_str;
+	static bool		_enable_udp;
+
+	static void onUDPEnableChanged(const myIOTValue *value, bool val);
 };
 
 

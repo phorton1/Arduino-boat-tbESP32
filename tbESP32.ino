@@ -38,7 +38,8 @@ HardwareSerial tbSerial(2);
 //------------------------------
 
 static valueIdType dash_items[] = {
-    ID_STATUS,
+    ID_ENABLE_UDP,
+	ID_STATUS,
     0
 };
 
@@ -50,13 +51,25 @@ const valDescriptor tbESP32_values[] =
 {
     {ID_DEVICE_NAME,    VALUE_TYPE_STRING,  VALUE_STORE_PREF,      VALUE_STYLE_REQUIRED,   NULL,    NULL,   ESP32_TELNET },
         // override base class element
+	{ID_ENABLE_UDP,     VALUE_TYPE_BOOL,  	VALUE_STORE_PREF,      VALUE_STYLE_NONE,   	   (void *) &tbESP32::_enable_udp,    (void *) tbESP32::onUDPEnableChanged,   },
     {ID_STATUS,         VALUE_TYPE_STRING,  VALUE_STORE_PUB,       VALUE_STYLE_READONLY,   (void *) &tbESP32::_status_str,    NULL,   },
 };
+
+
 
 #define NUM_TBESP32_VALUES (sizeof(tbESP32_values)/sizeof(valDescriptor))
 
 tbESP32 *tb_esp32;
 String tbESP32::_status_str;
+bool   tbESP32::_enable_udp;
+
+
+void tbESP32::onUDPEnableChanged(const myIOTValue *value, bool val)
+{
+	LOGI("onUDPEnableChanged(%d)",val);
+	digitalWrite(PIN_ENABLE_UDP,val);
+}
+
 
 //--------------------------------
 // main
@@ -64,6 +77,9 @@ String tbESP32::_status_str;
 
 void setup()
 {
+	pinMode(PIN_ENABLE_UDP,OUTPUT);
+	digitalWrite(PIN_ENABLE_UDP,0);
+
     Serial.begin(MY_IOT_ESP32_CORE == 3 ? 115200 : 921600);
     delay(1000);
 
@@ -77,7 +93,15 @@ void setup()
 
     LOGU("opening Serial2",0);
     tbSerial.begin(921600, SERIAL_8N1, PIN_SERIAL2_RX, PIN_SERIAL2_TX);
-    LOGU("tbESP32.ino setup() finished",0);
+
+	if (tb_esp32->getBool(ID_ENABLE_UDP))
+	{
+		LOGI("setup setting PIN_ENABLE_UDP HIGH",0);
+		digitalWrite(PIN_ENABLE_UDP,1);
+	}
+
+	LOGU("tbESP32.ino setup() finished",0);
+
 }
 
 
