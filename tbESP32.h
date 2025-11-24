@@ -14,8 +14,8 @@
 // pins
 //=========================================================
 
-#define PIN_SERIAL2_RX
-#define PIN_SERIAL2_TX
+#define PIN_SERIAL2_RX		25
+#define PIN_SERIAL2_TX		26
 
 //------------------------
 // myIOT definition
@@ -32,12 +32,12 @@ class tbESP32 : public myIOTDevice
 {
 public:
 
-    tbESP32();
+    tbESP32() {}
     ~tbESP32() {}
 
-    virtual void setup() override;
-    virtual void loop() override;
-	virtual bool showDebug(String path) override;
+    //	virtual void setup() override;
+    //	virtual void loop() override;
+	//	virtual bool showDebug(String path) override;
 
 	static String	_status_str;
 };
@@ -47,11 +47,3 @@ extern tbESP32 *tb_esp32;
 
 
 
-
-
-//=========================================================
-// external utilities
-//=========================================================
-
-extern int rpmToDuty(int rpm);
-	// in fridge.cpp
