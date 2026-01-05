@@ -23,7 +23,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
-#define DEBUG_TEENSY_BINARY_TO_UDP     0
+#define DEBUG_TB_SERIAL			       0		// 1=lines, 2=every byte
 #define DEBUG_UDP_TO_TEENSY            0
 #define DEBUG_TEENSY_TO_UDP            0
 
@@ -182,6 +182,10 @@ void loop()
             {
                 uint8_t b = tbSerial.read();
 
+				#if DEBUG_TB_SERIAL>1
+					LOGV("serial=%d '%c'",b, b>32 && b<=0x7f ? b : ' ');
+				#endif
+
                 if (!inBinary)
                 {
                     if (b == 0x02)
@@ -194,7 +198,10 @@ void loop()
                     else if (b == 0x0A)
                     {
                         textBuffer += (char)b;
-                        addMessageToUDP((const uint8_t*)textBuffer.c_str(), textBuffer.length());
+						#if DEBUG_TB_SERIAL
+							LOGV("got serial text: %s",textBuffer.c_str());
+                        #endif
+						addMessageToUDP((const uint8_t*)textBuffer.c_str(), textBuffer.length());
                         textBuffer = "";
                     }
                     else
@@ -209,9 +216,15 @@ void loop()
                     if (binReceived == 3)
                     {
                         binLength = (uint16_t)binBuffer[1] | ((uint16_t)binBuffer[2] << 8);
-                        if (binLength == 0)
+						#if DEBUG_TB_SERIAL>1
+							LOGV("got binlength=%d",binLength);
+                        #endif
+						if (binLength == 0)
                         {
-                            addMessageToUDP(binBuffer, binReceived);
+							#if DEBUG_TB_SERIAL
+								LOGV("got null binary buffer %d bytes",binReceived);
+                            #endif
+							addMessageToUDP(binBuffer, binReceived);
                             inBinary = false;
                             binLength = 0;
                             binReceived = 0;
@@ -219,7 +232,10 @@ void loop()
                     }
                     else if (binReceived >= binLength + 3)
                     {
-                        addMessageToUDP(binBuffer, binReceived);
+						#if DEBUG_TB_SERIAL
+							LOGV("adding binLength(%d) binary buffer %d bytes",binLength,binReceived);
+                        #endif
+						addMessageToUDP(binBuffer, binReceived);
                         inBinary = false;
                         binLength = 0;
                         binReceived = 0;
